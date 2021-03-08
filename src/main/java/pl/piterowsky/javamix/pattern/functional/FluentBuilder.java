@@ -49,8 +49,8 @@ class UserFunctionalBuilder {
 class UserImperativeBuilder {
 
     private final Long id;
-
     private final String login;
+
     private String email;
 
     public UserImperativeBuilder(Long id, String login) {
