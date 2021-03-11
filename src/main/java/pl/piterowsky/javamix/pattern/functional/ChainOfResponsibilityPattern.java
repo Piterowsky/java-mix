@@ -1,11 +1,16 @@
 package pl.piterowsky.javamix.pattern.functional;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class ChainOfResponsibilityPattern {
+
+    private static final String LOG_TRANSITION_MESSAGE = "Transition from {} to {}";
 
     public static void main(String[] args) {
         // Imperative way
@@ -16,7 +21,7 @@ public class ChainOfResponsibilityPattern {
 
         // Functional way
         var functionalSubject = new Subject();
-        Function<Subject, Subject> initial = s -> new Subject();
+        UnaryOperator<Subject> initial = s -> new Subject();
         Function<Subject, Subject> functionalChain = initial
                 .andThen(FunctionalWay::doStep1)
                 .andThen(FunctionalWay::doStep2)
@@ -25,6 +30,7 @@ public class ChainOfResponsibilityPattern {
     }
 
     @Log4j2(topic = "FunctionalWay")
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     static class FunctionalWay {
 
         private static Subject doStep1(Subject s) {
@@ -36,14 +42,14 @@ public class ChainOfResponsibilityPattern {
 
         private static Subject doStep2(Subject s) {
             var newState = State.STATE_2;
-            log.info("Transition from {} to {}", s.getCurrentState(), newState);
+            log.info(LOG_TRANSITION_MESSAGE, s.getCurrentState(), newState);
             s.setCurrentState(newState);
             return s;
         }
 
         private static Subject doStep3(Subject s) {
             var newState = State.STATE_3;
-            log.info("Transition from {} to {}", s.getCurrentState(), newState);
+            log.info(LOG_TRANSITION_MESSAGE, s.getCurrentState(), newState);
             s.setCurrentState(newState);
             return s;
         }
@@ -51,9 +57,10 @@ public class ChainOfResponsibilityPattern {
     }
 
     @Log4j2(topic = "ImperativeWay")
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     static class ImperativeWay {
 
-        static abstract class AbstractStep {
+        abstract static class AbstractStep {
 
             private AbstractStep nextStep;
 
@@ -88,7 +95,7 @@ public class ChainOfResponsibilityPattern {
             @Override
             protected Subject doStep(Subject subject) {
                 var newState = State.STATE_2;
-                log.info("Transition from {} to {}", subject.getCurrentState(), newState);
+                log.info(LOG_TRANSITION_MESSAGE, subject.getCurrentState(), newState);
                 subject.setCurrentState(newState);
                 return subject;
             }
@@ -100,7 +107,7 @@ public class ChainOfResponsibilityPattern {
             @Override
             protected Subject doStep(Subject subject) {
                 var newState = State.STATE_3;
-                log.info("Transition from {} to {}", subject.getCurrentState(), newState);
+                log.info(LOG_TRANSITION_MESSAGE, subject.getCurrentState(), newState);
                 subject.setCurrentState(State.STATE_3);
                 return subject;
             }
