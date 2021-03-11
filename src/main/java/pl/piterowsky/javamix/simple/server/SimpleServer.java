@@ -35,7 +35,7 @@ public class SimpleServer {
         var server = new SimpleServer();
         server.get("/hello", (httpExchange, params) -> {
             var simplePojo = new SimplePojo();
-            simplePojo.setHello("Hello " +  params.getOrDefault("name", "World"));
+            simplePojo.setHello("Hello " + params.getOrDefault("name", "World"));
             simplePojo.setAge(12);
             return simplePojo;
         });
@@ -60,15 +60,30 @@ public class SimpleServer {
     public <T> void get(String path, BiFunction<HttpExchange, Map<String, String>, T> function) {
         server.createContext(path, httpExchange -> {
             if (HttpMethod.GET.matches(httpExchange.getRequestMethod())) {
-                var param = httpExchange.getRequestURI().toString().split("\\?")[1].split("=");
-                var responseObject = function.apply(httpExchange, Collections.singletonMap(param[0], param[1]));
+                var uri = httpExchange.getRequestURI().toString();
+                var responseObject = function.apply(httpExchange, getParamsMap(uri));
                 try {
                     handleResponse(httpExchange, responseObject);
+                    return;
                 } catch (Exception e) {
                     log.error("Exception occurred while preparing response");
                 }
             }
+            log.error("Only GET method can be handled");
         });
+    }
+
+    private Map<String, String> getParamsMap(String uri) {
+        if (uri.contains("?")) {
+            var paramsStr = uri.split("\\?")[1];
+            if (paramsStr.contains("=")) {
+                var paramsArray = paramsStr.split("=");
+                return paramsArray.length >= 2
+                        ? Collections.singletonMap(paramsArray[0], paramsArray[1])
+                        : Collections.emptyMap();
+            }
+        }
+        return Collections.emptyMap();
     }
 
     public void post(String path, Consumer<HttpExchange> consumer) {
@@ -83,8 +98,10 @@ public class SimpleServer {
 
 @Data
 class SimplePojo {
+
     private String hello;
     private Integer age;
+
 }
 
 enum HttpMethod {
