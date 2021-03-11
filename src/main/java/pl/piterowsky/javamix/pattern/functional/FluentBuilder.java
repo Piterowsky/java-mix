@@ -10,11 +10,15 @@ public class FluentBuilder {
 
     public static void main(String[] args) {
         log.info("Imperative: {}", new UserImperativeBuilder(1L, "imperative")
+                .postalCode("72-001")
                 .email("imperative email")
                 .build()
         );
         log.info("Functional: {}", new UserFunctionalBuilder(2L, "functional")
-                .with(builder -> builder.email = "functional email")
+                .with(builder -> {
+                    builder.email = "functional email";
+                    builder.postalCode = "72-001";
+                })
                 .build()
         );
     }
@@ -27,6 +31,7 @@ class UserFunctionalBuilder {
     private final String login;
 
     public String email;
+    public String postalCode;
 
     public UserFunctionalBuilder(Long id, String login) {
         this.id = id;
@@ -41,6 +46,7 @@ class UserFunctionalBuilder {
     public User build() {
         var user = new User(id, login);
         user.setEmail(email);
+        user.setEmail(postalCode);
         return user;
     }
 
@@ -52,6 +58,7 @@ class UserImperativeBuilder {
     private final String login;
 
     private String email;
+    private String postalCode;
 
     public UserImperativeBuilder(Long id, String login) {
         this.id = id;
@@ -60,6 +67,11 @@ class UserImperativeBuilder {
 
     public UserImperativeBuilder email(String email) {
         this.email = email;
+        return this;
+    }
+
+    public UserImperativeBuilder postalCode(String postalCode) {
+        this.postalCode = postalCode;
         return this;
     }
 
